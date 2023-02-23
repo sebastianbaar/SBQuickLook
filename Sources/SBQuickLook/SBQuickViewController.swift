@@ -11,11 +11,7 @@ import QuickLook
 
 final class SBQuickViewController: UIViewController {
     internal var qlController: QLPreviewController?
-    internal var previewItems: [SBPreviewItem] = [] {
-        didSet {
-            qlController?.reloadData()
-        }
-    }
+    internal var previewItems: [SBPreviewItem] = []
     
     public var urls: [URL]
     
@@ -51,8 +47,9 @@ final class SBQuickViewController: UIViewController {
             qlController?.currentPreviewItemIndex = 0
             
             downloadFiles { [weak self] in
-                guard let self else { return }
-                self.present(self.qlController!, animated: true)
+                guard let self, let qlController = self.qlController else { return }
+                qlController.reloadData()
+                self.present(qlController, animated: true)
             }
         }
     }
