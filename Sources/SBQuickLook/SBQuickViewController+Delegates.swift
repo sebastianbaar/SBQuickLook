@@ -1,6 +1,6 @@
 //
 //  SBQuickViewController+Delegates.swift
-//  
+//  SBQuickLook
 //
 //  Created by Sebastian Baar on 23.02.23.
 //
@@ -15,8 +15,6 @@ extension SBQuickViewController: QLPreviewControllerDataSource {
     public func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
         return previewItems[index]
     }
-    
-    
 }
 
 extension SBQuickViewController: QLPreviewControllerDelegate {
@@ -29,4 +27,3 @@ extension SBQuickViewController: QLPreviewControllerDelegate {
         dismiss(animated: false)
     }
 }
-

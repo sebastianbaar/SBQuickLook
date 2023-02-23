@@ -1,6 +1,6 @@
 //
 //  SBPreviewItem.swift
-//  
+//  SBQuickLook
 //
 //  Created by Sebastian Baar on 23.02.23.
 //

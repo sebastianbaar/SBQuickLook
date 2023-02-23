@@ -1,6 +1,6 @@
 //
 //  SBQuickLookView.swift
-//
+//  SBQuickLook
 //
 //  Created by Sebastian Baar on 23.02.23.
 //
@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import QuickLook
 
+/// The SwiftUI view representable
 public struct SBQuickLookView {
     public let fileItems: [SBFileItem]
     

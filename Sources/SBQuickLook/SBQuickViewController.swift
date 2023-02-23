@@ -1,6 +1,6 @@
 //
 //  SBQuickViewController.swift
-//
+//  SBQuickLook
 //
 //  Created by Sebastian Baar on 23.02.23.
 //
@@ -9,12 +9,17 @@ import UIKit
 import SwiftUI
 import QuickLook
 
+/// The `SBQuickViewController` to preview one or multiple files
 public final class SBQuickViewController: UIViewController {
     internal var qlController: QLPreviewController?
     internal var previewItems: [SBPreviewItem] = []
     
     public var fileItems: [SBFileItem]
     
+    /// Initializes the `SBQuickViewController` with the given file items.
+    ///
+    /// - Parameters:
+    ///   - fileItems: The data for populating the preview. Could be one or many items.
     public init(fileItems: [SBFileItem]) {
         self.fileItems = fileItems
         
@@ -39,6 +44,11 @@ public final class SBQuickViewController: UIViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        if fileItems.count == 0 {
+            print("SBQuickViewController :: fileItems should not be empty")
+            dismiss(animated: false)
+        }
         
         if qlController == nil {
             qlController = QLPreviewController()

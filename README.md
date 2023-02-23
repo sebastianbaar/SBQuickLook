@@ -1,2 +1,76 @@
 # SBQuickLook
- 
+
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg?longCache=true&style=flat-square)](https://en.wikipedia.org/wiki/MIT_License)
+
+Quickly preview local & external files and their content using Apple's QuickLook Framework.
+
+This package provides a wrapper around Apple's **[QuickLook Framework](https://developer.apple.com/documentation/quicklook)**. 
+- Can preview:
+  - iWork and Microsoft Office documents
+  - Images
+  - Live Photos
+  - Text files
+  - PDFs
+  - Audio and video files
+  - Augmented reality objects that use the USDZ file format (iOS and iPadOS only)
+  - ZIP files
+  - ...
+- Can be used with **UIKit** or **SwiftUI**
+- Can be used to preview **one** or **multiple** files at once.
+- Can be used with **local file** URLs or **external** URLs (it also handels downloading the files).
+
+## 📦 Installation
+
+Add this Swift package in Xcode using its Github repository url. (File > Swift Packages > Add Package Dependency...)
+
+## 🚀 How to use
+
+You have to pass the file items `SBFileItem` to the initializer. Either pass one item or multiple items to the View/Controller.
+
+### UIKit 
+Present the `SBQuickViewController` from your favorite ViewController.
+
+```swift
+let localFileURL = Bundle.main.url(forResource: "sample-local-pdf", withExtension: "pdf")!
+
+let fileItems = [
+    SBFileItem(url: localFileURL, title: "LOCAL FILE"),
+    SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
+]
+
+let qlController = SBQuickViewController(fileItems: fileItems)
+qlController.modalPresentationStyle = .overFullScreen
+present(qlController, animated: true)
+```
+
+### SwiftUI
+Present the `SBQuickLookView` (which is a `UIViewControllerRepresentable` wrapper for the `SBQuickViewController`) from your favorite View.
+
+```swift
+@State var isShown = false
+
+let fileItems: [SBFileItem]
+
+init() {
+    let localFileURL = Bundle.main.url(forResource: "sample-local-pdf", withExtension: "pdf")!
+    
+    fileItems = [
+        SBFileItem(url: localFileURL, title: "LOCAL FILE"),
+        SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
+    ]
+}
+
+var body: some View {
+    VStack {            
+        Button {
+            isShown.toggle()
+        } label: {
+            Text("Open QuickLook of files")
+        }
+    }
+    .fullScreenCover(isPresented: $isShown, content: {
+        SBQuickLookView(fileItems: fileItems)
+    })        
+}
+``` 
+
