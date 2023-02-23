@@ -9,7 +9,7 @@ import UIKit
 import SwiftUI
 import QuickLook
 
-final class SBQuickViewController: UIViewController {
+public final class SBQuickViewController: UIViewController {
     internal var qlController: QLPreviewController?
     internal var previewItems: [SBPreviewItem] = []
     
@@ -25,19 +25,19 @@ final class SBQuickViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .clear
     }
     
-    override func willMove(toParent parent: UIViewController?) {
+    public override func willMove(toParent parent: UIViewController?) {
         super.willMove(toParent: parent)
         
         parent?.view?.backgroundColor = .clear
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         if qlController == nil {
