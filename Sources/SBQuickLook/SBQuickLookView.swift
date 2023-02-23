@@ -10,16 +10,16 @@ import SwiftUI
 import QuickLook
 
 public struct SBQuickLookView {
-    public let urls: [URL]
+    public let fileItems: [SBFileItem]
     
-    public init(urls: [URL]) {
-        self.urls = urls
+    public init(fileItems: [SBFileItem]) {
+        self.fileItems = fileItems
     }
 }
 
 extension SBQuickLookView: UIViewControllerRepresentable {
     public func makeUIViewController(context _: Context) -> UIViewController {
-        return SBQuickViewController(urls: urls)
+        return SBQuickViewController(fileItems: fileItems)
     }
     
     public func updateUIViewController(

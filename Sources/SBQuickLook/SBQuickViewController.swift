@@ -13,10 +13,10 @@ public final class SBQuickViewController: UIViewController {
     internal var qlController: QLPreviewController?
     internal var previewItems: [SBPreviewItem] = []
     
-    public var urls: [URL]
+    public var fileItems: [SBFileItem]
     
-    public init(urls: [URL]) {
-        self.urls = urls
+    public init(fileItems: [SBFileItem]) {
+        self.fileItems = fileItems
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -61,13 +61,16 @@ extension SBQuickViewController {
         let session = URLSession.shared
         var itemsToPreview: [SBPreviewItem] = []
         
-        for url in urls {
-            let (fileName, fileExtension) = self.getFileNameAndExtension(url)
+        for item in fileItems {
+            let fileInfo = self.getFileNameAndExtension(item.url)
             
-            if url.isFileURL {
+            let fileExtension = fileInfo.fileExtension
+            let fileName = (item.title != nil && item.title?.isEmpty == false) ? item.title! : fileInfo.fileName
+            
+            if item.url.isFileURL {
                 itemsToPreview.append(
                     SBPreviewItem(
-                        previewItemURL: url,
+                        previewItemURL: item.url,
                         previewItemTitle: fileName
                     )
                 )
@@ -96,7 +99,7 @@ extension SBQuickViewController {
             
             taskGroup.enter()
             
-            let request = URLRequest(url: url)
+            let request = URLRequest(url: item.url)
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
                     taskGroup.leave()
