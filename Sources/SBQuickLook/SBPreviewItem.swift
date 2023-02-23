@@ -7,7 +7,7 @@
 
 import QuickLook
 
-final public class SBPreviewItem: NSObject, QLPreviewItem {
+final internal class SBPreviewItem: NSObject, QLPreviewItem {
     public var previewItemURL: URL?
     public var previewItemTitle: String?
 

@@ -18,8 +18,7 @@ let package = Package(
     targets: [
         .target(
             name: "SBQuickLook",
-            dependencies: [],
-            exclude: ["Examples"]),
+            dependencies: []),
         .testTarget(
             name: "SBQuickLookTests",
             dependencies: ["SBQuickLook"]),

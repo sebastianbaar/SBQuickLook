@@ -26,24 +26,3 @@ extension SBQuickLookView: UIViewControllerRepresentable {
         _: UIViewController, context _: Context
     ) {}
 }
-
-struct TransparentBackground: UIViewControllerRepresentable {
-    public func makeUIViewController(context _: Context) -> UIViewController {
-        return TransparentController()
-    }
-    
-    public func updateUIViewController(_: UIViewController, context _: Context) {}
-    
-    class TransparentController: UIViewController {
-        override func viewDidLoad() {
-            super.viewDidLoad()
-            view.backgroundColor = .clear
-        }
-        
-        override func willMove(toParent parent: UIViewController?) {
-            super.willMove(toParent: parent)
-            parent?.view?.backgroundColor = .clear
-            parent?.modalPresentationStyle = .overCurrentContext
-        }
-    }
-}

@@ -1,6 +1,6 @@
 //
 //  SBQuickViewController.swift
-//  
+//
 //
 //  Created by Sebastian Baar on 23.02.23.
 //
@@ -10,8 +10,8 @@ import SwiftUI
 import QuickLook
 
 final class SBQuickViewController: UIViewController {
-    private var qlController: QLPreviewController?
-    private var previewItems: [SBPreviewItem] = [] {
+    internal var qlController: QLPreviewController?
+    internal var previewItems: [SBPreviewItem] = [] {
         didSet {
             qlController?.reloadData()
         }
@@ -29,6 +29,18 @@ final class SBQuickViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = .clear
+    }
+    
+    override func willMove(toParent parent: UIViewController?) {
+        super.willMove(toParent: parent)
+        
+        parent?.view?.backgroundColor = .clear
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -37,28 +49,42 @@ final class SBQuickViewController: UIViewController {
             qlController?.dataSource = self
             qlController?.delegate = self
             qlController?.currentPreviewItemIndex = 0
-            present(qlController!, animated: true)
             
-            checkAndDownloadFiles()
+            downloadFiles { [weak self] in
+                guard let self else { return }
+                self.present(self.qlController!, animated: true)
+            }
         }
     }
-    
-    private func checkAndDownloadFiles() {
+}
+
+extension SBQuickViewController {
+    private func downloadFiles(_ completion: (() -> Void)?) {
         let taskGroup = DispatchGroup()
         let session = URLSession.shared
         var itemsToPreview: [SBPreviewItem] = []
         
         for url in urls {
-            taskGroup.enter()
+            let (fileName, fileExtension) = self.getFileNameAndExtension(url)
+            
+            if url.isFileURL {
+                itemsToPreview.append(
+                    SBPreviewItem(
+                        previewItemURL: url,
+                        previewItemTitle: fileName
+                    )
+                )
+                
+                continue
+            }
             
             let fileManager = FileManager.default
             let cacheDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            let (fileName, fileExtension) = self.getFileNameAndExtension(url)
             let localFileUrl = cacheDir.appendingPathComponent("\(fileName).\(fileExtension)")
             
-            if fileManager.fileExists(atPath: localFileUrl.absoluteString) {
+            if fileManager.fileExists(atPath: localFileUrl.path) {
                 do {
-                    try fileManager.removeItem(atPath: localFileUrl.absoluteString)
+                    try fileManager.removeItem(atPath: localFileUrl.path)
                 } catch {
                     itemsToPreview.append(
                         SBPreviewItem(
@@ -67,16 +93,13 @@ final class SBQuickViewController: UIViewController {
                         )
                     )
                     
-                    taskGroup.leave()
+                    continue
                 }
             }
             
-            let request = URLRequest(
-                url: url,
-                cachePolicy: .reloadIgnoringLocalCacheData,
-                timeoutInterval: 10
-            )
+            taskGroup.enter()
             
+            let request = URLRequest(url: url)
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
                     taskGroup.leave()
@@ -84,7 +107,6 @@ final class SBQuickViewController: UIViewController {
                 }
                 
                 do {
-                    // after downloading your file you need to move it to your destination url
                     try FileManager.default.moveItem(at: location, to: localFileUrl)
                     
                     itemsToPreview.append(
@@ -96,8 +118,6 @@ final class SBQuickViewController: UIViewController {
                     
                     taskGroup.leave()
                 } catch {
-                    print(error.localizedDescription)
-                    
                     taskGroup.leave()
                 }
             }.resume()
@@ -105,41 +125,16 @@ final class SBQuickViewController: UIViewController {
         
         taskGroup.notify(queue: .main) { [weak self] in
             self?.previewItems = itemsToPreview
+            completion?()
         }
     }
     
     private func getFileNameAndExtension(_ fileURL: URL) -> (fileName: String, fileExtension: String) {
-        let urlFileName = fileURL.lastPathComponent
-        let fileName = urlFileName.isEmpty ? UUID().uuidString : urlFileName
         let urlExtension = fileURL.pathExtension
         let fileExtension = urlExtension.isEmpty ? "file" : urlExtension
+        let urlFileName = fileURL.lastPathComponent
+        let fileName = urlFileName.isEmpty ? UUID().uuidString : urlFileName.replacingOccurrences(of: ".\(fileExtension)", with: "")
+        
         return (fileName, fileExtension)
-    }
-}
-
-extension SBQuickViewController: QLPreviewControllerDataSource {
-    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
-        return previewItems.count
-    }
-    
-    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
-        return previewItems[index]
-    }
-    
-    
-}
-
-extension SBQuickViewController: QLPreviewControllerDelegate {
-    @available(iOS 13.0, *)
-    func previewController(_ controller: QLPreviewController, editingModeFor previewItem: QLPreviewItem) -> QLPreviewItemEditingMode {
-        .createCopy
-    }
-    
-    func previewControllerWillDismiss(_ controller: QLPreviewController) {
-        dismiss(animated: true)
-    }
-    
-    func previewControllerDidDismiss(_ controller: QLPreviewController) {
-        dismiss(animated: true)
     }
 }
