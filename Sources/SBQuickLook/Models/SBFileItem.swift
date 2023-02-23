@@ -10,4 +10,9 @@ import Foundation
 public struct SBFileItem {
     public var url: URL
     public var title: String?
+    
+    public init(url: URL, title: String? = nil) {
+        self.url = url
+        self.title = title
+    }
 }
