@@ -64,7 +64,7 @@ extension SBQuickViewController {
         for item in fileItems {
             let fileInfo = self.getFileNameAndExtension(item.url)
             
-            let fileExtension = fileInfo.fileExtension
+            let fileExtension = (item.mediaType != nil && item.mediaType?.isEmpty == false) ? item.mediaType! : fileInfo.fileExtension
             let fileName = (item.title != nil && item.title?.isEmpty == false) ? item.title! : fileInfo.fileName
             
             if item.url.isFileURL {

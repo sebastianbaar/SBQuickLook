@@ -22,7 +22,5 @@ extension SBQuickLookView: UIViewControllerRepresentable {
         return SBQuickViewController(fileItems: fileItems)
     }
     
-    public func updateUIViewController(
-        _: UIViewController, context _: Context
-    ) {}
+    public func updateUIViewController(_: UIViewController, context _: Context) {}
 }
