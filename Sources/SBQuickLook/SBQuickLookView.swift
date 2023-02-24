@@ -33,7 +33,11 @@ public struct SBQuickLookView {
 
 extension SBQuickLookView: UIViewControllerRepresentable {
     public func makeUIViewController(context _: Context) -> UIViewController {
-        return SBQuickViewController(fileItems: fileItems, configuration: configuration)
+        return SBQuickViewController(
+            fileItems: fileItems,
+            configuration: configuration,
+            completion: completion
+        )
     }
 
     public func updateUIViewController(_: UIViewController, context _: Context) {}
