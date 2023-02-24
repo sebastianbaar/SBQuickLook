@@ -27,6 +27,36 @@ Add this Swift package in Xcode using its Github repository url. (File > Swift P
 
 You have to pass the file items `SBFileItem` to the initializer. Either pass one item or multiple items to the View/Controller.
 
+```swift
+/// Initializes the file item with the given values.
+///
+/// - Parameters:
+///   - url: `URL` of the item, choose between local file URLs or external URLs
+///   - title: Optional title `String` to be displayed in the QuickLook controller.
+///   - content: Optional media type `String` of the file; e.g. `"pdf"`, `"jpeg"`, ...
+///   - urlRequest: Optional `URLRequest` used to download the item. The `url` is always set to `fileItem.url`. Default: `URLRequest(url: fileItem.url)`
+public init(url: URL, title: String? = nil, mediaType: String? = nil, urlRequest: URLRequest? = nil) {
+    self.url = url
+    self.title = title
+    self.mediaType = mediaType
+    self.urlRequest = urlRequest
+}
+```
+
+You can also pass an optional `SBQLConfiguration` to the initializer.
+
+```swift
+/// Initializes the file item with the given values.
+///
+/// - Parameters:
+///   - urlRequest: Optional `URLSession`. Overrides the `URLSession` used by the download task. Default: `URLSession.shared`
+///   - localFileDir: Optional local directory `URL`. Overrides the local directory `URL` used by the download task. Default: `FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)`
+public init(session: URLSession? = nil, localFileDir: URL? = nil) {
+    self.session = session
+    self.localFileDir = localFileDir
+}
+```
+
 ### UIKit 
 Present the `SBQuickViewController` from your favorite ViewController.
 

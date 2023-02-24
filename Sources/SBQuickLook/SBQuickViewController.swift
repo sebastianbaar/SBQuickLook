@@ -18,7 +18,7 @@ public final class SBQuickViewController: UIViewController {
     public var fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
     
-    /// Initializes the `SBQuickViewController` with the given file items.
+    /// Initializes the `SBQuickViewController` with the given file items and configuration.
     ///
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
@@ -31,7 +31,7 @@ public final class SBQuickViewController: UIViewController {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError("SBQuickLook: init(coder:) has not been implemented")
     }
     
     public override func viewDidLoad() {
@@ -49,9 +49,10 @@ public final class SBQuickViewController: UIViewController {
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if fileItems.count == 0 {
-            print("SBQuickViewController :: fileItems should not be empty")
+        guard fileItems.count > 0 else {
+            print("SBQuickLook: fileItems should not be empty")
             dismiss(animated: false)
+            return
         }
         
         if qlController == nil {
@@ -62,8 +63,8 @@ public final class SBQuickViewController: UIViewController {
             
             downloadFiles { [weak self] in
                 guard let self, let qlController = self.qlController else { return }
-                qlController.reloadData()
                 self.present(qlController, animated: true)
+                qlController.reloadData()
             }
         }
     }
@@ -127,6 +128,7 @@ extension SBQuickViewController {
             }
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
+                    print("SBQuickLook: Error downloading fileUrl=\(item.url); \(error != nil ? error!.localizedDescription : "")")
                     taskGroup.leave()
                     return
                 }
@@ -143,6 +145,7 @@ extension SBQuickViewController {
                     
                     taskGroup.leave()
                 } catch {
+                    print("SBQuickLook: Error moving file to '\(localFileUrl)'; \(error.localizedDescription)")
                     taskGroup.leave()
                 }
             }.resume()
