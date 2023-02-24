@@ -11,7 +11,7 @@ let package = Package(
     products: [
         .library(
             name: "SBQuickLook",
-            targets: ["SBQuickLook"]),
+            targets: ["SBQuickLook"])
     ],
     targets: [
         .target(
@@ -19,6 +19,6 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "SBQuickLookTests",
-            dependencies: ["SBQuickLook"]),
+            dependencies: ["SBQuickLook"])
     ]
 )

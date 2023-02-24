@@ -13,7 +13,7 @@ import QuickLook
 public struct SBQuickLookView {
     public let fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
-    
+
     /// Initializes the `SBQuickLookView` with the given file items and configuration.
     ///
     /// - Parameters:
@@ -29,6 +29,6 @@ extension SBQuickLookView: UIViewControllerRepresentable {
     public func makeUIViewController(context _: Context) -> UIViewController {
         return SBQuickViewController(fileItems: fileItems, configuration: configuration)
     }
-    
+
     public func updateUIViewController(_: UIViewController, context _: Context) {}
 }
