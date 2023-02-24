@@ -15,17 +15,23 @@ public final class SBQuickViewController: UIViewController {
     internal var previewItems: [SBQLPreviewItem] = []
 
     // - MARK: Public
-    public var fileItems: [SBQLFileItem]
+    public let fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
+    public let completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)?
 
     /// Initializes the `SBQuickViewController` with the given file items and configuration.
     ///
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
     ///   - configuration: Optional `SBQLConfiguration` configurations.
-    public init(fileItems: [SBQLFileItem], configuration: SBQLConfiguration? = nil) {
+    public init(
+        fileItems: [SBQLFileItem],
+        configuration: SBQLConfiguration? = nil,
+        completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)? = nil) {
+
         self.fileItems = fileItems
         self.configuration = configuration
+        self.completion = completion
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -50,36 +56,60 @@ public final class SBQuickViewController: UIViewController {
         super.viewWillAppear(animated)
 
         guard fileItems.count > 0 else {
-            print("SBQuickLook: fileItems should not be empty")
+            completion?(.failure(.emptyFileItems))
             dismiss(animated: false)
             return
         }
 
-        if qlController == nil {
-            qlController = QLPreviewController()
-            qlController?.dataSource = self
-            qlController?.delegate = self
-            qlController?.currentPreviewItemIndex = 0
-
-            downloadFiles { [weak self] in
-                guard let self, let qlController = self.qlController else { return }
-                self.present(qlController, animated: true)
-                qlController.reloadData()
-            }
-        }
+        showPreviewController()
     }
 }
 
 extension SBQuickViewController {
+    private func showPreviewController() {
+        guard qlController == nil else { return }
+
+        qlController = QLPreviewController()
+        qlController?.dataSource = self
+        qlController?.delegate = self
+        qlController?.currentPreviewItemIndex = 0
+
+        downloadFiles { [weak self] itemsToPreview, successErrors in
+            guard let self else { return }
+
+            guard let qlController = self.qlController else {
+                self.completion?(.failure(.qlPreviewControllerError))
+                self.dismiss(animated: false)
+                return
+            }
+
+            guard itemsToPreview.count > 0 else {
+                self.completion?(.failure(.downloadError))
+                self.dismiss(animated: false)
+                return
+            }
+
+            self.previewItems = itemsToPreview
+
+            self.present(qlController, animated: true) {
+                self.completion?(.success(successErrors))
+            }
+
+            qlController.reloadData()
+        }
+    }
+
     // swiftlint:disable function_body_length
-    private func downloadFiles(_ completion: (() -> Void)?) {
+    private func downloadFiles(_ completion: @escaping ([SBQLPreviewItem], [SBQLSuccessError]?) -> Void) {
         let taskGroup = DispatchGroup()
 
         var session = URLSession.shared
         if let customSession = configuration?.session {
             session = customSession
         }
+
         var itemsToPreview: [SBQLPreviewItem] = []
+        var successErrors: [SBQLSuccessError] = []
 
         for item in fileItems {
             let fileInfo = self.getFileNameAndExtension(item.url)
@@ -133,9 +163,11 @@ extension SBQuickViewController {
             }
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
-                    print(
-                        "SBQuickLook: Error downloading fileUrl=\(item.url); " +
-                        "\(error != nil ? error!.localizedDescription : "")"
+                    successErrors.append(
+                        SBQLSuccessError(
+                            type: .download(error),
+                            url: item.url
+                        )
                     )
                     taskGroup.leave()
                     return
@@ -153,15 +185,22 @@ extension SBQuickViewController {
 
                     taskGroup.leave()
                 } catch {
-                    print("SBQuickLook: Error moving file to '\(localFileUrl)'; \(error.localizedDescription)")
+                    successErrors.append(
+                        SBQLSuccessError(
+                            type: .moveTo(error),
+                            url: localFileUrl
+                        )
+                    )
                     taskGroup.leave()
                 }
             }.resume()
         }
 
-        taskGroup.notify(queue: .main) { [weak self] in
-            self?.previewItems = itemsToPreview
-            completion?()
+        taskGroup.notify(queue: .main) {
+            completion(
+                itemsToPreview,
+                successErrors.count == 0 ? nil : successErrors
+            )
         }
     }
     // swiftlint:enable function_body_length
