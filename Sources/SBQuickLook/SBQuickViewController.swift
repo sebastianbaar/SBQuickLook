@@ -24,17 +24,17 @@ public final class SBQuickViewController: UIViewController {
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
     ///   - configuration: Optional `SBQLConfiguration` configurations.
+    ///   - completion: Optional `Result<[SBQLSuccessError]?, SBQLError>` completion.
     public init(
         fileItems: [SBQLFileItem],
         configuration: SBQLConfiguration? = nil,
         completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)? = nil) {
+            self.fileItems = fileItems
+            self.configuration = configuration
+            self.completion = completion
 
-        self.fileItems = fileItems
-        self.configuration = configuration
-        self.completion = completion
-
-        super.init(nibName: nil, bundle: nil)
-    }
+            super.init(nibName: nil, bundle: nil)
+        }
 
     required init?(coder: NSCoder) {
         fatalError("SBQuickLook: init(coder:) has not been implemented")
@@ -115,11 +115,11 @@ extension SBQuickViewController {
             let fileInfo = self.getFileNameAndExtension(item.url)
 
             let fileExtension = (item.mediaType != nil && item.mediaType?.isEmpty == false) ?
-                item.mediaType! :
-                fileInfo.fileExtension
+            item.mediaType! :
+            fileInfo.fileExtension
             let fileName = (item.title != nil && item.title?.isEmpty == false) ?
-                item.title! :
-                fileInfo.fileName
+            item.title! :
+            fileInfo.fileName
 
             if item.url.isFileURL {
                 itemsToPreview.append(
@@ -210,8 +210,8 @@ extension SBQuickViewController {
         let fileExtension = urlExtension.isEmpty ? "file" : urlExtension
         let urlFileName = fileURL.lastPathComponent
         let fileName = urlFileName.isEmpty ?
-            UUID().uuidString :
-            urlFileName.replacingOccurrences(of: ".\(fileExtension)", with: "")
+        UUID().uuidString :
+        urlFileName.replacingOccurrences(of: ".\(fileExtension)", with: "")
 
         return (fileName, fileExtension)
     }

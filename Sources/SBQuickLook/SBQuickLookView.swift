@@ -13,16 +13,22 @@ import QuickLook
 public struct SBQuickLookView {
     public let fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
+    public let completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)?
 
     /// Initializes the `SBQuickLookView` with the given file items and configuration.
     ///
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
     ///   - configuration: Optional `SBQLConfiguration` configurations.
-    public init(fileItems: [SBQLFileItem], configuration: SBQLConfiguration? = nil) {
-        self.fileItems = fileItems
-        self.configuration = configuration
-    }
+    ///   - completion: Optional `Result<[SBQLSuccessError]?, SBQLError>` completion.
+    public init(
+        fileItems: [SBQLFileItem],
+        configuration: SBQLConfiguration? = nil,
+        completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)? = nil) {
+            self.fileItems = fileItems
+            self.configuration = configuration
+            self.completion = completion
+        }
 }
 
 extension SBQuickLookView: UIViewControllerRepresentable {
