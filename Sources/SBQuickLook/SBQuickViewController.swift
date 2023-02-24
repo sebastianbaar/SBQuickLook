@@ -12,16 +12,20 @@ import QuickLook
 /// The `SBQuickViewController` to preview one or multiple files
 public final class SBQuickViewController: UIViewController {
     internal var qlController: QLPreviewController?
-    internal var previewItems: [SBPreviewItem] = []
+    internal var previewItems: [SBQLPreviewItem] = []
     
-    public var fileItems: [SBFileItem]
+    // - MARK: Public
+    public var fileItems: [SBQLFileItem]
+    public let configuration: SBQLConfiguration?
     
     /// Initializes the `SBQuickViewController` with the given file items.
     ///
     /// - Parameters:
-    ///   - fileItems: The data for populating the preview. Could be one or many items.
-    public init(fileItems: [SBFileItem]) {
+    ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
+    ///   - configuration: Optional `SBQLConfiguration` configurations.
+    public init(fileItems: [SBQLFileItem], configuration: SBQLConfiguration? = nil) {
         self.fileItems = fileItems
+        self.configuration = configuration
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -68,8 +72,12 @@ public final class SBQuickViewController: UIViewController {
 extension SBQuickViewController {
     private func downloadFiles(_ completion: (() -> Void)?) {
         let taskGroup = DispatchGroup()
-        let session = URLSession.shared
-        var itemsToPreview: [SBPreviewItem] = []
+        
+        var session = URLSession.shared
+        if let customSession = configuration?.session {
+            session = customSession
+        }
+        var itemsToPreview: [SBQLPreviewItem] = []
         
         for item in fileItems {
             let fileInfo = self.getFileNameAndExtension(item.url)
@@ -79,7 +87,7 @@ extension SBQuickViewController {
             
             if item.url.isFileURL {
                 itemsToPreview.append(
-                    SBPreviewItem(
+                    SBQLPreviewItem(
                         previewItemURL: item.url,
                         previewItemTitle: fileName
                     )
@@ -89,15 +97,18 @@ extension SBQuickViewController {
             }
             
             let fileManager = FileManager.default
-            let cacheDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            let localFileUrl = cacheDir.appendingPathComponent("\(fileName).\(fileExtension)")
+            var localFileDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
+            if let customLocalFileDir = configuration?.localFileDir {
+                localFileDir = customLocalFileDir
+            }
+            let localFileUrl = localFileDir.appendingPathComponent("\(fileName).\(fileExtension)")
             
             if fileManager.fileExists(atPath: localFileUrl.path) {
                 do {
                     try fileManager.removeItem(atPath: localFileUrl.path)
                 } catch {
                     itemsToPreview.append(
-                        SBPreviewItem(
+                        SBQLPreviewItem(
                             previewItemURL: localFileUrl,
                             previewItemTitle: fileName
                         )
@@ -109,7 +120,11 @@ extension SBQuickViewController {
             
             taskGroup.enter()
             
-            let request = URLRequest(url: item.url)
+            var request = URLRequest(url: item.url)
+            if var customURLRequest = item.urlRequest {
+                customURLRequest.url = item.url
+                request = customURLRequest
+            }
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
                     taskGroup.leave()
@@ -120,7 +135,7 @@ extension SBQuickViewController {
                     try FileManager.default.moveItem(at: location, to: localFileUrl)
                     
                     itemsToPreview.append(
-                        SBPreviewItem(
+                        SBQLPreviewItem(
                             previewItemURL: localFileUrl,
                             previewItemTitle: fileName
                         )
