@@ -111,3 +111,6 @@ var body: some View {
 }
 ``` 
 
+## 🎓 Example
+
+Example SwiftUI Project can be found [here](https://github.com/sebastianbaar/SBQuickLook-Example/tree/main).
