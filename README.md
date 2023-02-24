@@ -68,7 +68,10 @@ let fileItems = [
     SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
 ]
 
-let qlController = SBQuickViewController(fileItems: fileItems)
+let localFileDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+let configuration = SBQLConfiguration(localFileDir: localFileDir)
+
+let qlController = SBQuickViewController(fileItems: fileItems, configuration: configuration)
 qlController.modalPresentationStyle = .overFullScreen
 present(qlController, animated: true)
 ```
@@ -80,6 +83,7 @@ Present the `SBQuickLookView` (which is a `UIViewControllerRepresentable` wrappe
 @State var isShown = false
 
 let fileItems: [SBFileItem]
+let configuration: SBQLConfiguration
 
 init() {
     let localFileURL = Bundle.main.url(forResource: "sample-local-pdf", withExtension: "pdf")!
@@ -88,6 +92,9 @@ init() {
         SBFileItem(url: localFileURL, title: "LOCAL FILE"),
         SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
     ]
+    
+    let localFileDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    configuration = SBQLConfiguration(localFileDir: localFileDir)
 }
 
 var body: some View {
@@ -99,7 +106,7 @@ var body: some View {
         }
     }
     .fullScreenCover(isPresented: $isShown, content: {
-        SBQuickLookView(fileItems: fileItems)
+        SBQuickLookView(fileItems: fileItems, configuration: configuration)
     })        
 }
 ``` 
