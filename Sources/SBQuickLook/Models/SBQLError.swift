@@ -8,7 +8,11 @@
 import Foundation
 
 /// Represents `SBQuickLook` error cases
-public struct SBQLError: Error {
-    /// `SBQuickLook` error type
-    public var type: SBQLErrorType
+public enum SBQLError: Error {
+    /// Error caused by no files / empty array of files
+    case emptyFileItems
+    /// Error downloading all given files
+    case downloadError
+    /// Error caused by initialising `QLPreviewController`
+    case qlPreviewControllerError
 }

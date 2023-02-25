@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents the input file item
-public struct SBQLFileItem: Hashable {
+public struct SBQLFileItem {
     /// `URL` of the item, choose between local file URLs or external URLs
     public var url: URL
     /// Optional title `String` to be displayed in the QuickLook controller.
