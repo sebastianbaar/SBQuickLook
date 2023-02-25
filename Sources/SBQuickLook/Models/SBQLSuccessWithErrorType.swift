@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// Represents `SBQLSuccessError` type
-public enum SBQLSuccessErrorType {
+/// Represents `SBQLSuccessWithErrorType` type
+public enum SBQLSuccessWithErrorType {
     /// Error downloading item from `URL`
     case download(Error?)
     /// Error moving item to `URL`

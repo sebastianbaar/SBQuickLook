@@ -17,7 +17,7 @@ public final class SBQuickViewController: UIViewController {
     // - MARK: Public
     public let fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
-    public let completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)?
+    public let completion: ((Result<[SBQLSuccessWithError]?, SBQLError>) -> Void)?
 
     /// Initializes the `SBQuickViewController` with the given file items and configuration.
     ///
@@ -28,7 +28,7 @@ public final class SBQuickViewController: UIViewController {
     public init(
         fileItems: [SBQLFileItem],
         configuration: SBQLConfiguration? = nil,
-        completion: ((Result<[SBQLSuccessError]?, SBQLError>) -> Void)? = nil) {
+        completion: ((Result<[SBQLSuccessWithError]?, SBQLError>) -> Void)? = nil) {
             self.fileItems = fileItems
             self.configuration = configuration
             self.completion = completion
@@ -100,7 +100,7 @@ extension SBQuickViewController {
     }
 
     // swiftlint:disable function_body_length
-    private func downloadFiles(_ completion: @escaping ([SBQLPreviewItem], [SBQLSuccessError]?) -> Void) {
+    private func downloadFiles(_ completion: @escaping ([SBQLPreviewItem], [SBQLSuccessWithError]?) -> Void) {
         let taskGroup = DispatchGroup()
 
         var session = URLSession.shared
@@ -109,7 +109,7 @@ extension SBQuickViewController {
         }
 
         var itemsToPreview: [SBQLPreviewItem] = []
-        var successErrors: [SBQLSuccessError] = []
+        var successWithErrors: [SBQLSuccessWithError] = []
 
         for item in fileItems {
             let fileInfo = self.getFileNameAndExtension(item.url)
@@ -163,8 +163,8 @@ extension SBQuickViewController {
             }
             session.downloadTask(with: request) { location, _, error in
                 guard let location, error == nil else {
-                    successErrors.append(
-                        SBQLSuccessError(
+                    successWithErrors.append(
+                        SBQLSuccessWithError(
                             type: .download(error),
                             url: item.url
                         )
@@ -185,8 +185,8 @@ extension SBQuickViewController {
 
                     taskGroup.leave()
                 } catch {
-                    successErrors.append(
-                        SBQLSuccessError(
+                    successWithErrors.append(
+                        SBQLSuccessWithError(
                             type: .moveTo(error),
                             url: localFileUrl
                         )
@@ -199,7 +199,7 @@ extension SBQuickViewController {
         taskGroup.notify(queue: .main) {
             completion(
                 itemsToPreview,
-                successErrors.count == 0 ? nil : successErrors
+                successWithErrors.count == 0 ? nil : successWithErrors
             )
         }
     }
