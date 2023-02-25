@@ -13,7 +13,7 @@ import QuickLook
 public struct SBQuickLookView {
     public let fileItems: [SBQLFileItem]
     public let configuration: SBQLConfiguration?
-    public let completion: ((Result<[SBQLSuccessWithError]?, SBQLError>) -> Void)?
+    public let completion: ((Result<SBQLError?, SBQLError>) -> Void)?
 
     /// Initializes the `SBQuickLookView` with the given file items and configuration.
     ///
@@ -24,7 +24,7 @@ public struct SBQuickLookView {
     public init(
         fileItems: [SBQLFileItem],
         configuration: SBQLConfiguration? = nil,
-        completion: ((Result<[SBQLSuccessWithError]?, SBQLError>) -> Void)? = nil) {
+        completion: ((Result<SBQLError?, SBQLError>) -> Void)? = nil) {
             self.fileItems = fileItems
             self.configuration = configuration
             self.completion = completion
