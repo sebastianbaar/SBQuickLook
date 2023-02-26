@@ -1,4 +1,5 @@
 # SBQuickLook
+[![iOS Build](https://github.com/sebastianbaar/SBQuickLook/actions/workflows/ios.yml/badge.svg)](https://github.com/sebastianbaar/SBQuickLook/actions/workflows/ios.yml)
 [![Swift](https://github.com/sebastianbaar/SBQuickLook/actions/workflows/swiftlint.yml/badge.svg)](https://github.com/sebastianbaar/SBQuickLook/actions/workflows/swiftlint.yml)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsebastianbaar%2FSBQuickLook%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/sebastianbaar/SBQuickLook)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsebastianbaar%2FSBQuickLook%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/sebastianbaar/SBQuickLook)
