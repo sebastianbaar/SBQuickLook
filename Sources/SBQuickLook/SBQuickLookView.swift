@@ -20,7 +20,9 @@ public struct SBQuickLookView {
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
     ///   - configuration: Optional `SBQLConfiguration` configurations.
-    ///   - completion: Optional `Result<[SBQLSuccessError]?, SBQLError>` completion.
+    ///   - completion: Optional `Result<SBQLError?, SBQLError>` completion.
+    ///      - success: `QLPreviewController` successfully presented with at least one item. Optional `SBQLError` if some items failed to download.
+    ///      - failure: `QLPreviewController` could not be  presented.
     public init(
         fileItems: [SBQLFileItem],
         configuration: SBQLConfiguration? = nil,

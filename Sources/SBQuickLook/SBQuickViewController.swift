@@ -20,11 +20,12 @@ public final class SBQuickViewController: UIViewController {
     public let completion: ((Result<SBQLError?, SBQLError>) -> Void)?
 
     /// Initializes the `SBQuickViewController` with the given file items and configuration.
-    ///
     /// - Parameters:
     ///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
     ///   - configuration: Optional `SBQLConfiguration` configurations.
-    ///   - completion: Optional `Result<[SBQLSuccessError]?, SBQLError>` completion.
+    ///   - completion: Optional `Result<SBQLError?, SBQLError>` completion.
+    ///      - success: `QLPreviewController` successfully presented with at least one item. Optional `SBQLError` if some items failed to download.
+    ///      - failure: `QLPreviewController` could not be  presented.
     public init(
         fileItems: [SBQLFileItem],
         configuration: SBQLConfiguration? = nil,
@@ -180,13 +181,7 @@ extension SBQuickViewController {
 
                     taskGroup.leave()
                 } catch {
-                    itemsToPreview.append(
-                        SBQLPreviewItem(
-                            previewItemURL: location,
-                            previewItemTitle: fileName
-                        )
-                    )
-
+                    failedItems[item] = error
                     taskGroup.leave()
                 }
             }.resume()

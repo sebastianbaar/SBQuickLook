@@ -27,7 +27,28 @@ Add this Swift package in Xcode using its Github repository url. (File > Swift P
 
 ## 🚀 How to use
 
-You have to pass the file items `SBFileItem` to the initializer. Either pass one item or multiple items to the View/Controller.
+Initialize the View (SwiftUI) or ViewController (UIKit)
+
+```swift
+/// Initializes the `SBQuickLookView` or `SBQuickViewController` with the given file items and configuration.
+///
+/// - Parameters:
+///   - fileItems: The `[SBQLFileItem]` data for populating the preview. Could be one or many items.
+///   - configuration: Optional `SBQLConfiguration` configurations.
+///   - completion: Optional `Result<SBQLError?, SBQLError>` completion.
+///      - success: `QLPreviewController` successfully presented with at least one item. Optional `SBQLError` if some items failed to download.
+///      - failure: `QLPreviewController` could not be  presented.
+public init(
+    fileItems: [SBQLFileItem],
+    configuration: SBQLConfiguration? = nil,
+    completion: ((Result<SBQLError?, SBQLError>) -> Void)? = nil) {
+        self.fileItems = fileItems
+        self.configuration = configuration
+        self.completion = completion
+    }
+```
+
+You have to pass the file items `SBFileItem` to the initializer. Either pass one item or multiple items to the View (SwiftUI) or ViewController (UIKit).
 
 ```swift
 /// Initializes the file item with the given values.
@@ -57,25 +78,6 @@ public init(session: URLSession? = nil, localFileDir: URL? = nil) {
     self.session = session
     self.localFileDir = localFileDir
 }
-```
-
-### UIKit 
-Present the `SBQuickViewController` from your favorite ViewController.
-
-```swift
-let localFileURL = Bundle.main.url(forResource: "sample-local-pdf", withExtension: "pdf")!
-
-let fileItems = [
-    SBFileItem(url: localFileURL, title: "LOCAL FILE"),
-    SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
-]
-
-let localFileDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-let configuration = SBQLConfiguration(localFileDir: localFileDir)
-
-let qlController = SBQuickViewController(fileItems: fileItems, configuration: configuration)
-qlController.modalPresentationStyle = .overFullScreen
-present(qlController, animated: true)
 ```
 
 ### SwiftUI
@@ -108,10 +110,46 @@ var body: some View {
         }
     }
     .fullScreenCover(isPresented: $isShown, content: {
-        SBQuickLookView(fileItems: fileItems, configuration: configuration)
+        SBQuickLookView(fileItems: fileItems, configuration: configuration) { result in
+            switch result {
+            case .success(let downloadError):
+                if let downloadError {
+                    print(downloadError)
+                }
+            case .failure(let error):
+                switch error.type {
+                case .emptyFileItems:
+                    print("emptyFileItems")
+                case .qlPreviewControllerError:
+                    print("qlPreviewControllerError")
+                case .download(let errorFileItems):
+                    print("all items failed downloading")
+                    print(errorFileItems)
+                }
+            }
+        }
     })        
 }
 ``` 
+
+### UIKit 
+Present the `SBQuickViewController` from your favorite ViewController.
+
+```swift
+let localFileURL = Bundle.main.url(forResource: "sample-local-pdf", withExtension: "pdf")!
+
+let fileItems = [
+    SBFileItem(url: localFileURL, title: "LOCAL FILE"),
+    SBFileItem(url: URL(string: "https://file-examples.com/storage/fe197d899c63f609e194cb1/2017/10/file_example_PNG_500kB.png")!, title: "Nice PNG Image", mediaType: "png")
+]
+
+let localFileDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+let configuration = SBQLConfiguration(localFileDir: localFileDir)
+
+let qlController = SBQuickViewController(fileItems: fileItems, configuration: configuration)
+qlController.modalPresentationStyle = .overFullScreen
+present(qlController, animated: true)
+```
 
 ## 🎓 Example
 
